@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dynamic text color demo using canvas</title>
+</head>
+<body>
+<label><b>Image with text</b></label>
+<div id="content" style="box-shadow:0px 0px 1px #000;width:200px;height:100px;">
+	<b style="z-index:2;position:absolute;color:black !important;">BLACK Text</b>
+	
+	<img src="b0.jpg" id="mdata" style="width:200px;height:100px;background-size:100%;position:absolute">	
+	
+	<br><b style="z-index:2;position:absolute;color:white !important;">WHITE Text</b>
+	<br><b style="z-index:2;position:absolute;color:rgb(127,127,127) !important;">GRAY Text</b>
+	<br><b style="z-index:2;position:absolute">CORRECTED COLOR</b>	
+</div><br><br>
+<label><b>Variables</b></label>
+<div id="height">
+	
+</div>
+<div id="width">
+	
+</div>
+<div id="dataLength">
+	
+</div>
+<div id="blackCount">
+	
+</div>
+<br>
+<label><b>Canvas for grayscale</b></label><br>
+<canvas id="myCanvas" width="200px" height="100px" style="box-shadow:0px 0px 1px #000"></canvas>
+  <script>
+      function drawImage(imageObj) {
+        var canvas = document.getElementById('myCanvas');
+        var context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        var x = 0;
+        var y = 0;
+
+        context.drawImage(imageObj,0, 0, imageObj.width,imageObj.height,
+        					0,0,canvas.width, canvas.height);
+
+        /* ~~~~~ Print height and widht of image ~~~~~ */
+        document.getElementById('height').innerHTML="height: "+imageObj.height;
+        document.getElementById('width').innerHTML="width: "+imageObj.width;
+        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+        var imageData = context.getImageData(x, y, canvas.width, canvas.height);
+        var data = imageData.data;
+        
+        /* ~~~~~ This part converts the image to grayscale ~~~~~ */
+	        for(var i = 0; i < data.length; i += 4) {
+	          var brightness = 0.34 * data[i] + 0.5 * data[i + 1] + 0.16 * data[i + 2];
+	          // red
+	          data[i] = brightness;
+	          // green
+	          data[i + 1] = brightness;
+	          // blue
+	          data[i + 2] = brightness;
+	        }
+  		/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+  		/* ~~~~~ This part counts the number of dark pixels ~~~~~ */
+	        var count=0;
+	        for(var j=0;j<data.length;j+=4){
+	        	if(data[j]<200 && data[j+1]<200 && data[j+2]<200){
+	        		count+=4;
+	        	}
+	        }
+        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+        /* ~~~~~ If the number of dark pixels are 80% of total pixels, then assume image to be dark ~~~~~ */
+	        if(count>=(data.length*0.8)){
+	        	document.getElementById('content').style.color="white";
+	        }else{
+	        	document.getElementById('content').style.color="black";
+	        }
+        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+        /* ~~~~~ Print total pixel and counted dark pixels ~~~~~ */
+	        document.getElementById('dataLength').innerHTML ="Data length"+data.length+" "+(data.length/2);
+	        document.getElementById('blackCount').innerHTML ="Black Count"+count;
+        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+        // Draw grayscale image on cavas
+        	context.putImageData(imageData, x, y);
+   
+      }
+    
+      /* ~~~~~ This function loops over various images ~~~~~ */
+      var c=0;
+      function loop(){
+      		c++;
+      		document.getElementById('mdata').src='b'+(c%10)+'.jpg';
+      		var imageObj = new Image();
+      		imageObj.onload = function() {
+       		drawImage(this);
+     		 }
+    
+      var s=document.getElementById('mdata').src;
+      imageObj.src=s;
+      }
+      setInterval(loop,2000);
+
+  </script>  
+ 
+</body>
+</html>
